@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Autocompletado de direcciòn con  Google Maps Places Javascript API</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+
+    <style type="text/css">
+        .mapControls {
+            margin-top: 10px;
+            border: 1px solid transparent;
+            border-radius: 2px 0 0 2px;
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            height: 32px;
+            outline: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+        #searchMapInput {
+            background-color: #fff;
+            font-family: Roboto;
+            font-size: 15px;
+            font-weight: 300;
+            margin-left: 12px;
+            padding: 0 11px 0 13px;
+            text-overflow: ellipsis;
+            width: 50%;
+        }
+        #searchMapInput:focus {
+            border-color: #4d90fe;
+        }
+    </style>
+</head>
+<body>
+  <div class="container">
+      <div class="row">
+            <h1>Autocompletado de direcciòn con  Google Maps Places Javascript API</h1>
+
+          <div class="col-md-6">
+                <input id="searchMapInput" class="mapControls" type="text" placeholder="Enter a location">
+                <ul id="geoData">
+                    <li>Full Address: <span id="location-snap"></span></li>
+                    <li>Latitude: <span id="lat-span"></span></li>
+                    <li>Longitude: <span id="lon-span"></span></li>
+                </ul>
+          </div>
+
+          <div class="col-md-6">
+                <input id="searchMapInput2" class="mapControls" type="text" placeholder="Enter a location 2">
+                <ul id="geoData2">
+                    <li>Full Address: <span id="location-snap2"></span></li>
+                    <li>Latitude: <span id="lat-span2"></span></li>
+                    <li>Longitude: <span id="lon-span2"></span></li>
+                </ul>
+          </div>
+          <div class="col-md-12">
+            <h2><span id="distance">Distancia</span></h2>
+          </div>
+          
+      </div>
+  </div>
+  
+
+  
+<script>
+function initMap() {
+    var PLACE1;
+    var PLACE2;
+    var input = document.getElementById('searchMapInput');
+  
+    var autocomplete = new google.maps.places.Autocomplete(input);
+   
+    autocomplete.addListener('place_changed', function() {
+        PLACE1 = autocomplete.getPlace();
+        document.getElementById('location-snap').innerHTML = PLACE1.formatted_address;
+        document.getElementById('lat-span').innerHTML = PLACE1.geometry.location.lat();
+        document.getElementById('lon-span').innerHTML = PLACE1.geometry.location.lng();
+        
+    });
+
+
+    var input2 = document.getElementById('searchMapInput2');
+    
+    var autocomplete2 = new google.maps.places.Autocomplete(input2);
+    
+    autocomplete2.addListener('place_changed', function() {
+        PLACE2 = autocomplete2.getPlace();
+        document.getElementById('location-snap2').innerHTML = PLACE2.formatted_address;
+        document.getElementById('lat-span2').innerHTML = PLACE2.geometry.location.lat();
+        document.getElementById('lon-span2').innerHTML = PLACE2.geometry.location.lng();
+        getDistanceA();
+    });
+
+
+
+    var getDistanceA = function(){
+        var origin1 = PLACE1.formatted_address; //'Greenwich, England';
+        var origin2 = PLACE2.formatted_address; //'Greenwich, England';
+
+        var P1lat = document.getElementById('lat-span').textContent;
+        var P1lng = document.getElementById('lon-span').textContent;
+
+        var P2lat = document.getElementById('lat-span2').textContent;
+        var P2lng = document.getElementById('lon-span2').textContent;
+
+        var destinationA = new google.maps.LatLng(P1lat, P1lng);
+        var destinationB = new google.maps.LatLng(P2lat, P2lng);
+
+        var service = new google.maps.DistanceMatrixService();
+        var Transit = {
+            modes: null,
+            routingPreference: null
+        }
+        var driOpt = {
+            departureTime: new Date(Date.now()),
+            trafficModel: 'optimistic'
+        }
+        service.getDistanceMatrix(
+        {
+            origins: [origin1, origin2],
+            destinations: [destinationA, destinationB],
+            travelMode: 'DRIVING',
+            transitOptions: Transit,
+            drivingOptions: driOpt,
+            unitSystem: google.maps.UnitSystem.METRIC,
+        }, callback);
+
+        function callback(response, status) {
+        // See Parsing the Results for
+        // the basics of a callback function.
+        document.getElementById('distance').innerHTML = "Distancia total: " + response.rows[1].elements[0].distance.text;
+        console.log(response);
+        }
+
+    }
+
+
+    /*
+
+    var rad = function(x) {
+        return x * Math.PI / 180;
+    };
+
+    var getDistance = function() {
+
+        var P1lat = document.getElementById('lat-span').textContent;
+        var P1lng = document.getElementById('lon-span').textContent;
+
+        var P2lat = document.getElementById('lat-span2').textContent;
+        var P2lng = document.getElementById('lon-span2').textContent;
+
+        var R = 6378137; // Earth’s mean radius in meter
+        var dLat = rad(P2lat - P1lat);
+        var dLong = rad(P2lng - P1lng);
+        var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(rad(P1lat)) * Math.cos(rad(P2lat)) *
+            Math.sin(dLong / 2) * Math.sin(dLong / 2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        var d = R * c;
+        var ttt = d / 1000; //mtrs to km
+        return Math.floor(ttt * 100) / 100; // = 5.46//
+    };*/
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?libraries=places&callback=initMap&key=AIzaSyB3S8xfrOu9Sh_6Fmd6fE32t72VHR9gk8s" async defer></script>
+
+
+</body>
+</html>
